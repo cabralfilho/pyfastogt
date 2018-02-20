@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import tarfile
+from validate_email import validate_email
 from urllib.request import urlopen
 
 
@@ -34,10 +35,7 @@ class CompileInfo(object):
 
 
 def is_valid_email(email: str) -> bool:
-    if not re.match('[^@]+@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', email):
-        return False
-
-    return True
+    return validate_email(email, check_mx=True)
 
 
 def is_role_based_email(email: str) -> bool:
