@@ -232,6 +232,8 @@ def get_os() -> str:
     uname_str = platform.system()
     if 'MINGW' in uname_str:
         return 'windows'
+    elif 'MSYS' in uname_str:
+        return 'windows'
     elif uname_str == 'Windows':
         return 'windows'
     elif uname_str == 'Linux':
