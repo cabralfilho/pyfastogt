@@ -146,7 +146,7 @@ def build_command_configure(compiler_flags: CompileInfo, source_dir_path, prefix
     compile_cmd = [executable, '--prefix={0}'.format(prefix_path)]
     compile_cmd.extend(compiler_flags.flags())
     subprocess.call(compile_cmd)
-    subprocess.call(['make', '-j2'])
+    subprocess.call(['make'])
     subprocess.call(['make', 'install'])
     if hasattr(shutil, 'which') and shutil.which('ldconfig'):
         subprocess.call(['ldconfig'])

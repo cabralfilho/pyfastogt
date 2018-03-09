@@ -21,7 +21,7 @@ class Message(object):
 
 
 class Policy(object):
-    def __init__(self, cb = None):
+    def __init__(self, cb=None):
         self.progress_ = 0.0
         self.cb_ = cb
 
