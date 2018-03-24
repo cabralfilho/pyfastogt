@@ -80,7 +80,7 @@ def linux_get_dist():
     """
     Return the running distribution group
     RHEL: RHEL, CENTOS, FEDORA
-    DEBIAN: UBUNTU, DEBIAN
+    DEBIAN: UBUNTU, DEBIAN, LINUXMINT
     """
     linux_tuple = platform.linux_distribution()
     dist_name = linux_tuple[0]
@@ -88,7 +88,7 @@ def linux_get_dist():
 
     if dist_name_upper in ["RHEL", "CENTOS LINUX", "FEDORA"]:
         return "RHEL"
-    elif dist_name_upper in ["DEBIAN", "UBUNTU"]:
+    elif dist_name_upper in ["DEBIAN", "UBUNTU", "LINUXMINT"]:
         return "DEBIAN"
     raise NotImplemented("Unknown platform '%s'" % dist_name)
 
