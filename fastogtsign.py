@@ -4,13 +4,30 @@
 Code-signs all nested binaries inside an app bundle (excluding the app itself).
 '''
 
-import os, sys, re
+import os, sys, re, platform
 import subprocess as sp
-from base import system_info
 
 SIGN_EXTENSIONS = ['.so', '.dylib']  # extension-less binaries are auto-included
 CODE_SIGN_OPTS = ['--verbose', '--force', '--sign']
 
+def get_os() -> str:
+    uname_str = platform.system()
+    if 'MINGW' in uname_str:
+        return 'windows'
+    elif 'MSYS' in uname_str:
+        return 'windows'
+    elif uname_str == 'Windows':
+        return 'windows'
+    elif uname_str == 'Linux':
+        return 'linux'
+    elif uname_str == 'Darwin':
+        return 'macosx'
+    elif uname_str == 'FreeBSD':
+        return 'freebsd'
+    elif uname_str == 'Android':
+        return 'android'
+    else:
+        return 'unknown'
 
 def is_translations(path):
     ext = os.path.splitext(path)[1]
@@ -71,7 +88,7 @@ def main():
         print('Usage: %s sign/list signing_identity app_path' % os.path.basename(__file__))
         exit(1)
     cs_identity, app_path = sys.argv[2:]
-    os_name = system_info.get_os()
+    os_name = get_os()
     if os_name == 'macosx':
         code_sign_nested_macosx(cs_identity, app_path, dryrun=(sys.argv[1] == 'list'))
     else:
