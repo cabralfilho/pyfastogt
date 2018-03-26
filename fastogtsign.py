@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Code-signs all nested binaries inside an app bundle (excluding the app itself).
@@ -6,6 +6,7 @@ Code-signs all nested binaries inside an app bundle (excluding the app itself).
 
 import os, sys, re
 import subprocess as sp
+from base import system_info
 
 SIGN_EXTENSIONS = ['.so', '.dylib']  # extension-less binaries are auto-included
 CODE_SIGN_OPTS = ['--verbose', '--force', '--sign']
@@ -48,32 +49,31 @@ def get_signable_binaries(path):
     return sorted(filter(None, map(get_signing_path, need_to_sign)), reverse=True)
 
 
-def code_sign_nested(identity, path, dryrun):
+def code_sign_nested_macosx(identity, path, dryrun):
     signables = get_signable_binaries(path)
     if len(signables) == 0:
-        print
-        "No signable binaries found."
+        print("No signable binaries found.")
         return False
     cmd = sp.check_output if not dryrun else lambda x: ' '.join(x)
     try:
         for bin in signables:
-            print
-            cmd(['codesign'] + CODE_SIGN_OPTS + [identity, bin])
+            print(cmd(['codesign'] + CODE_SIGN_OPTS + [identity, bin]))
     except sp.CalledProcessError:
-        print
-        'Code signing failed.'
+        print('Code signing failed.')
         exit(1)
-    print
-    '%s successfully complete.' % ('Code signing' if not dryrun else 'Dry run')
+    print('%s successfully complete.' % ('Code signing' if not dryrun else 'Dry run'))
 
 
 def main():
     if (len(sys.argv) != 4) or (sys.argv[1] not in ('sign', 'list')):
-        print
-        'Usage: %s sign/list signing_identity app_path' % os.path.basename(__file__)
+        print('Usage: %s sign/list signing_identity app_path' % os.path.basename(__file__))
         exit(1)
     cs_identity, app_path = sys.argv[2:]
-    code_sign_nested(cs_identity, app_path, dryrun=(sys.argv[1] == 'list'))
+    os_name = system_info.get_os()
+    if os_name == 'macosx':
+        code_sign_nested_macosx(cs_identity, app_path, dryrun=(sys.argv[1] == 'list'))
+    else:
+        print('Please implement code sign for: %s' % os_name)
 
 
 if __name__ == '__main__':
