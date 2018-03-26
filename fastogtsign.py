@@ -25,15 +25,16 @@ def is_probably_binary(path):
 
 
 def is_definitely_binary(path):
-    return 'Mach-O' in sp.check_output(['file', '--brief', path])
+    return b'Mach-O' in sp.check_output(['file', '--brief', path])
 
 
 def get_signing_path(path):
-    m = re.match('(.*/(.*)\.framework)/Versions/./(.*)', path)
+    path_str = str(path)
+    m = re.match('(.*/(.*)\.framework)/Versions/./(.*)', path_str)
     if m and (m.lastindex == 3) and m.group(2) == m.group(3):
         # This is the main binary of a framework. Sign the framework version instead.
         path = m.group(1)
-    m = re.match('.*/(.*)\.app/Contents/MacOS/(.*)', path)
+    m = re.match('.*/(.*)\.app/Contents/MacOS/(.*)', path_str)
     if m and (m.lastindex == 2) and m.group(1) == m.group(2):
         # This is the main binary of the app bundle. Exclude it.
         path = None
@@ -45,8 +46,8 @@ def get_signable_binaries(path):
     trans = filter(is_translations, all_files)
     bins = filter(is_probably_binary, all_files)
     bins = filter(is_definitely_binary, bins)
-    need_to_sign = [bins, trans]
-    return sorted(filter(None, map(get_signing_path, need_to_sign)), reverse=True)
+    mapped_sign = filter(None, map(get_signing_path, bins))
+    return sorted(mapped_sign, reverse=True)
 
 
 def code_sign_nested_macosx(identity, path, dryrun):
