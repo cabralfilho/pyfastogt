@@ -41,17 +41,18 @@ def get_signing_path(path):
     return path
 
 
-def get_signable_binaries(path):
+def get_signable_files(path):
     all_files = [os.path.join(root, fn) for root, dirs, names in os.walk(path) for fn in names]
     trans = filter(is_translations, all_files)
     bins = filter(is_probably_binary, all_files)
     bins = filter(is_definitely_binary, bins)
-    mapped_sign = filter(None, map(get_signing_path, bins))
+    files = list(bins) + list(trans)
+    mapped_sign = filter(None, map(get_signing_path, files))
     return sorted(mapped_sign, reverse=True)
 
 
 def code_sign_nested_macosx(identity, path, dryrun):
-    signables = get_signable_binaries(path)
+    signables = get_signable_files(path)
     if len(signables) == 0:
         print("No signable binaries found.")
         return False
