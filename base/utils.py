@@ -7,6 +7,8 @@ import re
 import shutil
 import subprocess
 import tarfile
+import json
+from validate_email import validate_email
 from urllib.request import urlopen
 
 
@@ -34,7 +36,19 @@ class CompileInfo(object):
 
 
 def is_valid_email(email: str) -> bool:
-    return validate_email.validate_email(email, check_mx=True)
+    dns_valid = validate_email(email, check_mx=True)
+    if not dns_valid:
+        return False
+
+    validate_url = 'https://open.kickbox.com/v1/disposable/{0}' + email
+    response = urlopen(validate_url)
+    if response.status != 200:
+        return False
+
+    data = response.read()
+    json_object = json.loads(data.decode("utf-8"))
+    is_disposable = json_object['disposable']
+    return not is_disposable
 
 
 def is_role_based_email(email: str) -> bool:
