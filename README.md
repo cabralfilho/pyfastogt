@@ -1,3 +1,8 @@
-# fastogt
-Utils for building projects
-# python3 setup.py install
+About PyFastoGT
+===============
+
+FastoGT python files.
+
+Build
+========
+`python3 setup.py install`
