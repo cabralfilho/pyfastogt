@@ -202,3 +202,21 @@ def symlink_force(target, link_name):
             os.symlink(target, link_name)
         else:
             raise e
+
+
+# Search for number in array
+def binary_search_impl(number, array, lo, hi):
+    if hi < lo:
+        return False
+
+    mid = (lo + hi) // 2
+    if number == array[mid]:
+        return True
+    elif number < array[mid]:
+        return binary_search_impl(number, array, lo, mid - 1)
+    else:
+        return binary_search_impl(number, array, mid + 1, hi)
+
+
+def binary_search_number(anum, array):  # convenience interface to binary_search()
+    return binary_search_impl(anum, array, 0, len(array) - 1)
