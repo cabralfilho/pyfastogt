@@ -102,7 +102,7 @@ setup(
     # },
     install_requires=REQUIRED,
     include_package_data=True,
-    license='MIT',
+    license='BSD 3',
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
