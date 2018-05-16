@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import platform
 import subprocess
 from abc import ABCMeta, abstractmethod
