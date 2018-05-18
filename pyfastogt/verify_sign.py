@@ -1,6 +1,18 @@
+import Crypto.Random
 from Crypto.Hash import SHA
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
+
+
+class Generator(object):
+    def __init__(self, bits_length=1024):
+        self.bits_length_ = bits_length
+
+    def generate(self, format='PEM'):
+        random_gen = Crypto.Random.new().read
+        private_key = RSA.generate(self.bits_length_, random_gen)
+        public_key = private_key.publickey()
+        return private_key.exportKey(format), public_key.exportKey(format)
 
 
 class Verify(object):
@@ -23,7 +35,7 @@ class Verify(object):
 
 
 class Sign(Verify):
-    def __init__(self, public_key, private_key):
+    def __init__(self, public_key: str, private_key: str):
         Verify.__init__(self, public_key)
         self.private_key_ = private_key
 
