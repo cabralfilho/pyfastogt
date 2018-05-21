@@ -4,6 +4,23 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
 
+class Reader(object):
+    def __init__(self, file_path):
+        self.file_path_ = file_path
+
+    def read(self, format='PEM'):
+        private_key_file = open(self.file_path_, 'rb')
+        private_key = RSA.importKey(private_key_file.read())
+        public_key = private_key.publickey()
+        return private_key.exportKey(format), public_key.exportKey(format)
+
+
+def write_key(file_path, key_data):
+    key_file = open(file_path, 'wb')
+    key_file.write(key_data)
+    key_file.close()
+
+
 class Generator(object):
     def __init__(self, bits_length=1024):
         self.bits_length_ = bits_length
@@ -13,6 +30,14 @@ class Generator(object):
         private_key = RSA.generate(self.bits_length_, random_gen)
         public_key = private_key.publickey()
         return private_key.exportKey(format), public_key.exportKey(format)
+
+
+class Writer(object):
+    def __init__(self, file_path):
+        self.file_path_ = file_path
+
+    def write(self, key_data):
+        return write_key(self.file_path_, key_data)
 
 
 class Verify(object):
