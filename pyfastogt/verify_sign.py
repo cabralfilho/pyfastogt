@@ -3,7 +3,6 @@ from Crypto.Hash import SHA
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
-
 class Reader(object):
     def __init__(self, file_path):
         self.file_path_ = file_path
@@ -66,7 +65,7 @@ class Sign(Verify):
 
     def sign(self, data: bytes) -> str:
         """
-        Sign transaction with private key
+        Sign data with private key
         """
         private_key = RSA.importKey(self.private_key_)
         signer = PKCS1_v1_5.new(private_key)

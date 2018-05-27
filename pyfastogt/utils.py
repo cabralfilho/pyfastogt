@@ -33,8 +33,8 @@ class CompileInfo(object):
         self.flags_.extend(other_args)
 
 
-def is_valid_email(email: str) -> bool:
-    dns_valid = validate_email(email, check_mx=True)
+def is_valid_email(email: str, check_mx: bool) -> bool:
+    dns_valid = validate_email(email, check_mx=check_mx)
     if not dns_valid:
         return False
 
