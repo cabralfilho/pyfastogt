@@ -38,7 +38,7 @@ def is_valid_email(email: str, check_mx: bool) -> bool:
     if not dns_valid:
         return False
 
-    validate_url = 'https://open.kickbox.com/v1/disposable/{0}' + email
+    validate_url = 'https://open.kickbox.com/v1/disposable/' + email
     response = urlopen(validate_url)
     if response.status != 200:
         return False
