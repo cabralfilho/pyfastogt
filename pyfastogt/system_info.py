@@ -88,6 +88,8 @@ def linux_get_dist():
         return "RHEL"
     elif dist_name_upper in ["DEBIAN", "UBUNTU", "LINUXMINT"]:
         return "DEBIAN"
+    elif dist_name_upper in ["ARCH"]:
+        return "ARCH"
     raise NotImplemented("Unknown platform '%s'" % dist_name)
 
 
@@ -108,6 +110,13 @@ class RedHatPlatform(Platform):
     def install_package(self, name):
         subprocess.call(['yum', '-y', 'install', name])
 
+class ArchPlatform(Platform):
+    def __init__(self, arch, package_types):
+        Platform.__init__(self, 'linux', arch, package_types)
+
+    def install_package(self, name):
+        subprocess.call(['pacman', '-S', '--noconfirm', name])
+
 
 class LinuxPlatforms(SupportedPlatforms):
     def __init__(self):
@@ -125,6 +134,8 @@ class LinuxPlatforms(SupportedPlatforms):
             return DebianPlatform(arch, package_types)
         elif distr == 'RHEL':
             return RedHatPlatform(arch, package_types)
+        elif distr == 'ARCH':
+            return ArchPlatform(arch, package_types)
         raise NotImplemented("Unknown distribution '%s'" % distr)
 
 
