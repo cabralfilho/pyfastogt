@@ -52,7 +52,7 @@ def is_valid_email(email: str, check_mx: bool) -> bool:
 
 
 def is_role_based_email(email: str) -> bool:
-    r = re.compile('([^@]+)@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$')
+    r = re.compile('([^@]+)@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,12})$')
     match = r.match(email)
     if not match:
         return False
