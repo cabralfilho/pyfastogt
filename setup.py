@@ -22,7 +22,7 @@ VERSION = None
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'validate_email', 'pycrypto'
+    'validate_email'
 ]
 
 # The rest you shouldn't have to touch too much :)
