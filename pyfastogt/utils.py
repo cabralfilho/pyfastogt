@@ -172,7 +172,7 @@ def build_from_sources(url, compiler_flags: CompileInfo, source_dir_path, prefix
     os.chdir(extracted_folder)
     build_command_configure(compiler_flags, source_dir_path, prefix_path, executable)
     os.chdir(pwd)
-    shutil.rmtree(extracted_folder)
+    # shutil.rmtree(extracted_folder)
 
 
 def git_clone(url: str, current_dir: str, branch=None, remove_dot_git=True):
