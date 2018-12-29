@@ -203,6 +203,17 @@ def build_from_sources(url, compiler_flags: CompileInfo, source_dir_path, prefix
     # shutil.rmtree(extracted_folder)
 
 
+def build_from_sources_autogen(url, compiler_flags: CompileInfo, source_dir_path, prefix_path,
+                               executable='./configure'):
+    pwd = os.getcwd()
+    file_path = download_file(url, pwd)
+    extracted_folder = extract_file(file_path, pwd)
+    os.chdir(extracted_folder)
+    build_command_configure(compiler_flags, source_dir_path, prefix_path, executable)
+    os.chdir(pwd)
+    # shutil.rmtree(extracted_folder)
+
+
 def git_clone(url: str, current_dir: str, branch=None, remove_dot_git=True):
     if branch:
         common_git_clone_line = ['git', 'clone', '--branch', branch, '--single-branch', url]
