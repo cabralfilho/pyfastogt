@@ -140,6 +140,34 @@ def extract_file(path, current_dir):
     return os.path.join(current_dir, target_path)
 
 
+def build_command_autogen(compiler_flags: CompileInfo, source_dir_path, prefix_path, executable='./configure'):
+    # patches
+    script_dir = os.path.dirname(source_dir_path)
+    # +x for exec file
+    st = os.stat(executable)
+    os.chmod(executable, st.st_mode | stat.S_IEXEC)
+
+    for file_names in compiler_flags.patches():
+        scan_dir = os.path.join(script_dir, file_names)
+        if os.path.exists(scan_dir):
+            for diff in os.listdir(scan_dir):
+                if re.match(r'.+\.patch', diff):
+                    patch_file = os.path.join(scan_dir, diff)
+                    line = 'patch -p0 < {0}'.format(patch_file)
+                    subprocess.call(['bash', '-c', line])
+
+    autogen_cmd = ['sh', 'autogen.sh']
+    subprocess.call(autogen_cmd)
+
+    compile_cmd = [executable, '--prefix={0}'.format(prefix_path)]
+    compile_cmd.extend(compiler_flags.flags())
+    subprocess.call(compile_cmd)
+    subprocess.call(['make'])
+    subprocess.call(['make', 'install'])
+    if hasattr(shutil, 'which') and shutil.which('ldconfig'):
+        subprocess.call(['ldconfig'])
+
+
 def build_command_configure(compiler_flags: CompileInfo, source_dir_path, prefix_path, executable='./configure'):
     # patches
     script_dir = os.path.dirname(source_dir_path)
