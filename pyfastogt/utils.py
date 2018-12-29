@@ -209,7 +209,7 @@ def build_from_sources_autogen(url, compiler_flags: CompileInfo, source_dir_path
     file_path = download_file(url, pwd)
     extracted_folder = extract_file(file_path, pwd)
     os.chdir(extracted_folder)
-    build_command_configure(compiler_flags, source_dir_path, prefix_path, executable)
+    build_command_autogen(compiler_flags, source_dir_path, prefix_path, executable)
     os.chdir(pwd)
     # shutil.rmtree(extracted_folder)
 
