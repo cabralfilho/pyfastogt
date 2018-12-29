@@ -143,6 +143,10 @@ def extract_file(path, current_dir):
 def build_command_autogen(compiler_flags: CompileInfo, source_dir_path, prefix_path, executable='./configure'):
     # patches
     script_dir = os.path.dirname(source_dir_path)
+
+    autogen_cmd = ['sh', 'autogen.sh']
+    subprocess.call(autogen_cmd)
+
     # +x for exec file
     st = os.stat(executable)
     os.chmod(executable, st.st_mode | stat.S_IEXEC)
@@ -155,9 +159,6 @@ def build_command_autogen(compiler_flags: CompileInfo, source_dir_path, prefix_p
                     patch_file = os.path.join(scan_dir, diff)
                     line = 'patch -p0 < {0}'.format(patch_file)
                     subprocess.call(['bash', '-c', line])
-
-    autogen_cmd = ['sh', 'autogen.sh']
-    subprocess.call(autogen_cmd)
 
     compile_cmd = [executable, '--prefix={0}'.format(prefix_path)]
     compile_cmd.extend(compiler_flags.flags())
