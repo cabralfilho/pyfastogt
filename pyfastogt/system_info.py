@@ -100,7 +100,7 @@ class DebianPlatform(Platform):
         Platform.__init__(self, 'linux', arch, package_types)
 
     def install_package(self, name):
-        subprocess.call(['apt-get', '-y', '--force-yes', 'install', name])
+        subprocess.call(['apt-get', '-y', '--no-install-recommends', 'install', name])
 
 
 class RedHatPlatform(Platform):
