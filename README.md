@@ -5,4 +5,4 @@ FastoGT python files.
 
 Build
 ========
-`python3 setup.py install -r requirements.txt`
+`python3 setup.py install`
