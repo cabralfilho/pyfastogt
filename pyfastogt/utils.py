@@ -7,6 +7,7 @@ import subprocess
 import tarfile
 import json
 import ssl
+import certifi
 from validate_email import validate_email
 from urllib.request import urlopen
 
@@ -91,7 +92,7 @@ def read_file_line_by_line_to_set(file) -> set:
 
 def download_file(url, current_dir):
     file_name = url.split('/')[-1]
-    response = urlopen(url)
+    response = urlopen(url, cafile=certifi.where())
     if response.status != 200:
         raise BuildError(
             "Can't fetch url: {0}, status: {1}, response: {2}".format(url, response.status, response.reason))
