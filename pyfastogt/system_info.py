@@ -54,9 +54,9 @@ class SupportedPlatforms(metaclass=ABCMeta):
     def package_types(self) -> list:
         return self.package_types_
 
-    def architecture_by_arch_name(self, arch_name) -> Architecture:
+    def architecture_by_arch_name(self, arch_name):
         for curr_arch in self.archs_:
-            if (curr_arch.name() == arch_name):
+            if curr_arch.name() == arch_name:
                 return curr_arch
 
         return None
@@ -64,14 +64,6 @@ class SupportedPlatforms(metaclass=ABCMeta):
     @abstractmethod
     def make_platform_by_arch(self, arch, package_types) -> Platform:  # factory method
         pass
-
-    def make_platform_by_arch_name(self, arch_name) -> Platform:
-        arch = self.architecture_by_arch_name(arch_name)
-        if not arch:
-            raise utils.BuildError('invalid arch')
-
-        packages_types = platform_or_none.package_types()
-        return make_platform_by_arch(arch, packages_types)
 
 
 def linux_get_dist():
@@ -288,8 +280,8 @@ class BuildSystem:
 
 
 SUPPORTED_BUILD_SYSTEMS = [BuildSystem('ninja', ['ninja'], '-GNinja'),
-                           BuildSystem('make', ['make', '-j2'], '-GUnix Makefiles'),
-                           BuildSystem('gmake', ['gmake', '-j2'], '-GUnix Makefiles')]
+                           BuildSystem('make', ['make', '-jn'], '-GUnix Makefiles'),
+                           BuildSystem('gmake', ['gmake', '-jn'], '-GUnix Makefiles')]
 
 
 def get_supported_build_system_by_name(name) -> BuildSystem:

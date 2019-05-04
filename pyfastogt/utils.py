@@ -143,6 +143,29 @@ def extract_file(path):
     return os.path.join(current_dir, target_path)
 
 
+def build_command_cmake(source_dir_path, prefix_path, cmake_flags, generator='Ninja', make_command='ninja'):
+    current_dir = os.getcwd()
+    cmake_project_root_abs_path = '..'
+    if not os.path.exists(cmake_project_root_abs_path):
+        raise BuildError('invalid cmake_project_root_path: %s' % cmake_project_root_abs_path)
+
+    cmake_line = ['cmake', cmake_project_root_abs_path, '-G', generator, '-DCMAKE_BUILD_TYPE=RELEASE']
+    cmake_line.extend(cmake_flags)
+    cmake_line.extend(['-DCMAKE_INSTALL_PREFIX={0}'.format(prefix_path)])
+    try:
+        os.chdir(source_dir_path)
+        os.mkdir('build_cmake_release')
+        os.chdir('build_cmake_release')
+        subprocess.call(cmake_line)
+        subprocess.call([make_command, 'install'])
+        if hasattr(shutil, 'which') and shutil.which('ldconfig'):
+            subprocess.call(['ldconfig'])
+    except Exception as ex:
+        raise ex
+    finally:
+        os.chdir(current_dir)
+
+
 def build_command_configure(compiler_flags: CompileInfo, source_dir_path, prefix_path, executable='./configure',
                             make_command='make'):
     # patches
@@ -178,31 +201,20 @@ def build_from_sources(url, compiler_flags: CompileInfo, source_dir_path, prefix
     # shutil.rmtree(extracted_folder)
 
 
-def build_from_sources_autogen(url, compiler_flags: CompileInfo, source_dir_path, prefix_path,
-                               executable='./configure'):
-    pwd = os.getcwd()
-    file_path = download_file(url)
-    extracted_folder = extract_file(file_path)
-    os.chdir(extracted_folder)
-    build_command_autogen(compiler_flags, source_dir_path, prefix_path, executable)
-    os.chdir(pwd)
-    # shutil.rmtree(extracted_folder)
-
-
 def git_clone(url: str, branch=None, remove_dot_git=True):
     current_dir = os.getcwd()
     if branch:
         common_git_clone_line = ['git', 'clone', '--branch', branch, '--single-branch', url]
     else:
         common_git_clone_line = ['git', 'clone', '--depth=1', url]
-    cloned_dir = os.path.splitext(url.rsplit('/', 1)[-1])[0]
-    common_git_clone_line.append(cloned_dir)
+    cloned_dir_name = os.path.splitext(url.rsplit('/', 1)[-1])[0]
+    common_git_clone_line.append(cloned_dir_name)
     subprocess.call(common_git_clone_line)
-    os.chdir(cloned_dir)
+    os.chdir(cloned_dir_name)
 
     common_git_clone_init_line = ['git', 'submodule', 'update', '--init', '--recursive']
     subprocess.call(common_git_clone_init_line)
-    directory = os.path.join(current_dir, cloned_dir)
+    directory = os.path.join(current_dir, cloned_dir_name)
     if remove_dot_git:
         shutil.rmtree(os.path.join(directory, '.git'))
     os.chdir(current_dir)
