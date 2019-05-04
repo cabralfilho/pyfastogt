@@ -108,7 +108,7 @@ def download_file(url):
     return os.path.join(current_dir, file_name)
 
 
-def extract_file(path):
+def extract_file(path, remove_after_extract=True):
     current_dir = os.getcwd()
     print("Extracting: {0}".format(path))
     try:
@@ -123,6 +123,8 @@ def extract_file(path):
         raise ex
     finally:
         tar_file.close()
+        if remove_after_extract:
+            os.remove(tar_file)
 
     return os.path.join(current_dir, target_path)
 
