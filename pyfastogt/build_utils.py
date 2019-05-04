@@ -47,7 +47,7 @@ class CompileInfo(object):
     def patches(self):
         return self.patches_
 
-    def flags(self):
+    def flags(self) -> list:
         return self.flags_
 
     def extend_flags(self, other_args):
@@ -71,7 +71,7 @@ def build_command_cmake(source_dir_path: str, prefix_path: str, cmake_flags: lis
         os.chdir('build_cmake_release')
         subprocess.call(cmake_line)
         make_line = build_system.cmd_line()
-        make_line.extend('install')
+        make_line.append('install')
         subprocess.call(make_line)
         if hasattr(shutil, 'which') and shutil.which('ldconfig'):
             subprocess.call(['ldconfig'])
@@ -101,7 +101,7 @@ def build_command_configure(compiler_flags: CompileInfo, patch_dir_path, prefix_
     compile_cmd.extend(compiler_flags.flags())
     subprocess.call(compile_cmd)
     make_line = build_system.cmd_line()
-    make_line.extend('install')
+    make_line.append('install')
     subprocess.call(make_line)
     if hasattr(shutil, 'which') and shutil.which('ldconfig'):
         subprocess.call(['ldconfig'])
