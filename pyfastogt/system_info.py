@@ -263,31 +263,6 @@ def get_supported_platform_by_name(platform) -> SupportedPlatforms:
     return next((x for x in SUPPORTED_PLATFORMS if x.name() == platform), None)
 
 
-class BuildSystem:
-    def __init__(self, name, cmd_line, cmake_generator_arg):
-        self.name_ = name
-        self.cmd_line_ = cmd_line
-        self.cmake_generator_arg_ = cmake_generator_arg
-
-    def cmake_generator_arg(self):
-        return self.cmake_generator_arg_
-
-    def name(self):
-        return self.name_
-
-    def cmd_line(self):  # cmd + args
-        return self.cmd_line_
-
-
-SUPPORTED_BUILD_SYSTEMS = [BuildSystem('ninja', ['ninja'], '-GNinja'),
-                           BuildSystem('make', ['make', '-jn'], '-GUnix Makefiles'),
-                           BuildSystem('gmake', ['gmake', '-jn'], '-GUnix Makefiles')]
-
-
-def get_supported_build_system_by_name(name) -> BuildSystem:
-    return next((x for x in SUPPORTED_BUILD_SYSTEMS if x.name() == name), None)
-
-
 def stable_path(path) -> str:
     if get_os() == 'windows':
         return path.replace("\\", "/")

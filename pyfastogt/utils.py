@@ -1,6 +1,5 @@
 import errno
 import os
-import stat
 import re
 import shutil
 import subprocess
@@ -12,27 +11,12 @@ from validate_email import validate_email
 from urllib.request import urlopen
 
 
-class BuildError(Exception):
+class CommonError(Exception):
     def __init__(self, value):
         self.value_ = value
 
     def __str__(self):
         return self.value_
-
-
-class CompileInfo(object):
-    def __init__(self, patches: list, flags: list):
-        self.patches_ = patches
-        self.flags_ = flags
-
-    def patches(self):
-        return self.patches_
-
-    def flags(self):
-        return self.flags_
-
-    def extend_flags(self, other_args):
-        self.flags_.extend(other_args)
 
 
 def is_valid_email(email: str, check_mx: bool) -> bool:
@@ -68,7 +52,7 @@ def is_role_based_email(email: str) -> bool:
 
 def read_file_line_by_line_to_list(file) -> list:
     if not os.path.exists(file):
-        raise BuildError('file path: {0} not exists'.format(file))
+        raise CommonError('file path: {0} not exists'.format(file))
 
     file_array = []
     with open(file, "r") as ins:
@@ -80,7 +64,7 @@ def read_file_line_by_line_to_list(file) -> list:
 
 def read_file_line_by_line_to_set(file) -> set:
     if not os.path.exists(file):
-        raise BuildError('file path: {0} not exists'.format(file))
+        raise CommonError('file path: {0} not exists'.format(file))
 
     file_set = set()
     with open(file, "r") as ins:
@@ -95,7 +79,7 @@ def download_file(url):
     file_name = url.split('/')[-1]
     response = urlopen(url, cafile=certifi.where())
     if response.status != 200:
-        raise BuildError(
+        raise CommonError(
             "Can't fetch url: {0}, status: {1}, response: {2}".format(url, response.status, response.reason))
 
     f = open(file_name, 'wb')
@@ -141,64 +125,6 @@ def extract_file(path):
         tar_file.close()
 
     return os.path.join(current_dir, target_path)
-
-
-def build_command_cmake(source_dir_path, prefix_path, cmake_flags, generator='Ninja', make_command='ninja'):
-    current_dir = os.getcwd()
-    cmake_project_root_abs_path = '..'
-    if not os.path.exists(cmake_project_root_abs_path):
-        raise BuildError('invalid cmake_project_root_path: %s' % cmake_project_root_abs_path)
-
-    cmake_line = ['cmake', cmake_project_root_abs_path, '-G', generator, '-DCMAKE_BUILD_TYPE=RELEASE']
-    cmake_line.extend(cmake_flags)
-    cmake_line.extend(['-DCMAKE_INSTALL_PREFIX={0}'.format(prefix_path)])
-    try:
-        os.chdir(source_dir_path)
-        os.mkdir('build_cmake_release')
-        os.chdir('build_cmake_release')
-        subprocess.call(cmake_line)
-        subprocess.call([make_command, 'install'])
-        if hasattr(shutil, 'which') and shutil.which('ldconfig'):
-            subprocess.call(['ldconfig'])
-    except Exception as ex:
-        raise ex
-    finally:
-        os.chdir(current_dir)
-
-
-def build_command_configure(compiler_flags: CompileInfo, source_dir_path, prefix_path, executable='./configure',
-                            make_command='make'):
-    # patches
-    script_dir = os.path.dirname(source_dir_path)
-    # +x for exec file
-    st = os.stat(executable)
-    os.chmod(executable, st.st_mode | stat.S_IEXEC)
-
-    for file_names in compiler_flags.patches():
-        scan_dir = os.path.join(script_dir, file_names)
-        if os.path.exists(scan_dir):
-            for diff in os.listdir(scan_dir):
-                if re.match(r'.+\.patch', diff):
-                    patch_file = os.path.join(scan_dir, diff)
-                    line = 'patch -p0 < {0}'.format(patch_file)
-                    subprocess.call(['bash', '-c', line])
-
-    compile_cmd = [executable, '--prefix={0}'.format(prefix_path)]
-    compile_cmd.extend(compiler_flags.flags())
-    subprocess.call(compile_cmd)
-    subprocess.call([make_command, 'install'])
-    if hasattr(shutil, 'which') and shutil.which('ldconfig'):
-        subprocess.call(['ldconfig'])
-
-
-def build_from_sources(url, compiler_flags: CompileInfo, source_dir_path, prefix_path, executable='./configure'):
-    pwd = os.getcwd()
-    file_path = download_file(url)
-    extracted_folder = extract_file(file_path)
-    os.chdir(extracted_folder)
-    build_command_configure(compiler_flags, source_dir_path, prefix_path, executable)
-    os.chdir(pwd)
-    # shutil.rmtree(extracted_folder)
 
 
 def git_clone(url: str, branch=None, remove_dot_git=True):

@@ -75,7 +75,7 @@ class MakePolicy(Policy):
             return None
 
         res = re.search(r'\A\[  (\d+)%\]', message)
-        if res != None:
+        if res:
             return float(res.group(1))
 
         return None
@@ -105,7 +105,7 @@ class NinjaPolicy(Policy):
             return None, None
 
         res = re.search(r'\A\[(\d+)/(\d+)\]', message)
-        if res != None:
+        if res:
             return float(res.group(1)), float(res.group(2))
 
         return None, None
