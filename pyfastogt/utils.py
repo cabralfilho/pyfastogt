@@ -216,7 +216,8 @@ def build_from_sources_autogen(url, compiler_flags: CompileInfo, source_dir_path
     # shutil.rmtree(extracted_folder)
 
 
-def git_clone(url: str, current_dir: str, branch=None, remove_dot_git=True):
+def git_clone(url: str, branch=None, remove_dot_git=True):
+    current_dir = os.getcwd()
     if branch:
         common_git_clone_line = ['git', 'clone', '--branch', branch, '--single-branch', url]
     else:
@@ -231,6 +232,7 @@ def git_clone(url: str, current_dir: str, branch=None, remove_dot_git=True):
     directory = os.path.join(current_dir, cloned_dir)
     if remove_dot_git:
         shutil.rmtree(os.path.join(directory, '.git'))
+    os.chdir(current_dir)
     return directory
 
 
