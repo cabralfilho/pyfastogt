@@ -54,9 +54,8 @@ class CompileInfo(object):
         self.flags_.extend(other_args)
 
 
-def build_command_cmake(source_dir_path: str, prefix_path: str, cmake_flags: list,
-                        build_system=get_supported_build_system_by_name('ninja')):
-    current_dir = os.getcwd()
+# must be in cmake folder
+def build_command_cmake(prefix_path: str, cmake_flags: list, build_system=get_supported_build_system_by_name('ninja')):
     cmake_project_root_abs_path = '..'
     if not os.path.exists(cmake_project_root_abs_path):
         raise BuildError('invalid cmake_project_root_path: %s' % cmake_project_root_abs_path)
@@ -66,7 +65,6 @@ def build_command_cmake(source_dir_path: str, prefix_path: str, cmake_flags: lis
     cmake_line.extend(cmake_flags)
     cmake_line.extend(['-DCMAKE_INSTALL_PREFIX={0}'.format(prefix_path)])
     try:
-        os.chdir(source_dir_path)
         os.mkdir('build_cmake_release')
         os.chdir('build_cmake_release')
         subprocess.call(cmake_line)
@@ -78,10 +76,9 @@ def build_command_cmake(source_dir_path: str, prefix_path: str, cmake_flags: lis
     except Exception as ex:
         ex_str = str(ex)
         raise BuildError(ex_str)
-    finally:
-        os.chdir(current_dir)
 
 
+# must be in configure folder
 def build_command_configure(compiler_flags: CompileInfo, patch_dir_path, prefix_path, executable='./configure',
                             build_system=get_supported_build_system_by_name('make')):
     # +x for exec file
@@ -157,25 +154,15 @@ class BuildRequest(object):
         return self.prefix_path_
 
     def build_snappy(self):
-        cloned_dir = utils.git_clone(generate_fastogt_git_path('snappy'))
-        self._build_via_cmake(cloned_dir, ['-DBUILD_SHARED_LIBS=OFF', '-DSNAPPY_BUILD_TESTS=OFF'])
+        self._clone_and_build_via_cmake(generate_fastogt_git_path('snappy'),
+                                        ['-DBUILD_SHARED_LIBS=OFF', '-DSNAPPY_BUILD_TESTS=OFF'])
 
     def build_jsonc(self):
-        cloned_dir = utils.git_clone(generate_fastogt_git_path('json-c'))
-        self._build_via_cmake(cloned_dir, ['-DBUILD_SHARED_LIBS=OFF'])
+        self._clone_and_build_via_cmake(generate_fastogt_git_path('json-c'), ['-DBUILD_SHARED_LIBS=OFF'])
 
     def build_libev(self):
         libev_compiler_flags = CompileInfo([], ['--with-pic', '--disable-shared', '--enable-static'])
-
-        pwd = os.getcwd()
-        cloned_dir = utils.git_clone(generate_fastogt_git_path('libev'))
-        os.chdir(cloned_dir)
-
-        autogen_libev = ['sh', 'autogen.sh']
-        subprocess.call(autogen_libev)
-
-        self._build_via_configure(libev_compiler_flags)
-        os.chdir(pwd)
+        self._clone_and_build_via_autogen(generate_fastogt_git_path('libev'), libev_compiler_flags)
 
     def build_cpuid(self):
         cpuid_compiler_flags = CompileInfo([], ['--disable-shared', '--enable-static'])
@@ -199,32 +186,66 @@ class BuildRequest(object):
         os.chdir(pwd)
 
     def build_common(self, with_qt=False):
-        cloned_dir = utils.git_clone(generate_fastogt_git_path('common'))
         cmake_flags = []
         if with_qt:
             cmake_flags.append('-DQT_ENABLED=ON')
 
-        self._build_via_cmake(cloned_dir, cmake_flags)
+        self._clone_and_build_via_cmake(generate_fastogt_git_path('common'), cmake_flags)
 
     def build_openssl(self, version):
         compiler_flags = CompileInfo([], ['no-shared', 'no-unit-test'])
         url = '{0}openssl-{1}.{2}'.format(self.OPENSSL_SRC_ROOT, version, self.ARCH_OPENSSL_EXT)
         self._download_and_build_via_configure(url, compiler_flags, './config')
 
-    def _clone_and_build_via_cmake(self, url, branch=None, remove_dot_git=True, cmake_flags=[]):
+    # clone
+    def _clone_and_build_via_cmake(self, url, cmake_flags: list, branch=None, remove_dot_git=True):
+        pwd = os.getcwd()
         cloned_dir = utils.git_clone(url, branch, remove_dot_git)
-        self._build_via_cmake(cloned_dir, cmake_flags)
+        os.chdir(cloned_dir)
+        self._build_via_cmake(cmake_flags)
+        os.chdir(pwd)
 
-    def _build_via_cmake(self, directory, cmake_flags: list):
-        build_command_cmake(directory, self.prefix_path_, cmake_flags)
+    def _clone_and_build_via_configure(self, url, compiler_flags: CompileInfo, branch=None, remove_dot_git=True):
+        pwd = os.getcwd()
+        cloned_dir = utils.git_clone(url, branch, remove_dot_git)
+        os.chdir(cloned_dir)
+        self._build_via_configure(compiler_flags)
+        os.chdir(pwd)
+
+    def _clone_and_build_via_autogen(self, url, compiler_flags: CompileInfo, executable='./configure', branch=None,
+                                     remove_dot_git=True):
+        pwd = os.getcwd()
+        cloned_dir = utils.git_clone(url, branch, remove_dot_git)
+        os.chdir(cloned_dir)
+        self._build_via_autogen(compiler_flags, executable)
+        os.chdir(pwd)
+
+    # download
+    def _download_and_build_via_autogen(self, url, compiler_flags: CompileInfo, executable='./configure'):
+        pwd = os.getcwd()
+        file_path = utils.download_file(url)
+        extracted_folder = utils.extract_file(file_path)
+        os.chdir(extracted_folder)
+        self._build_via_autogen(compiler_flags, executable)
+        os.chdir(pwd)
 
     def _download_and_build_via_configure(self, url, compiler_flags: CompileInfo, executable='./configure'):
         pwd = os.getcwd()
         file_path = utils.download_file(url)
         extracted_folder = utils.extract_file(file_path)
         os.chdir(extracted_folder)
-        build_command_configure(compiler_flags, self.patch_path_, self.prefix_path_, executable)
+        self._build_via_configure(compiler_flags, executable)
         os.chdir(pwd)
+
+    # build
+    def _build_via_autogen(self, compiler_flags: CompileInfo, executable='./configure'):
+        autogen_line = ['sh', 'autogen.sh']
+        subprocess.call(autogen_line)
+        self._build_via_configure(compiler_flags, executable)
+
+    # raw build
+    def _build_via_cmake(self, cmake_flags: list):
+        build_command_cmake(self.prefix_path_, cmake_flags)
 
     def _build_via_configure(self, compiler_flags: CompileInfo, executable='./configure'):
         build_command_configure(compiler_flags, self.patch_path_, self.prefix_path_, executable)
