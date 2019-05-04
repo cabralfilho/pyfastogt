@@ -7,18 +7,18 @@ from pyfastogt import system_info, utils
 
 
 class BuildSystem:
-    def __init__(self, name, cmd_line, cmake_generator_arg):
+    def __init__(self, name: str, cmd_line: list, cmake_generator_arg: str):
         self.name_ = name
         self.cmd_line_ = cmd_line
         self.cmake_generator_arg_ = cmake_generator_arg
 
-    def cmake_generator_arg(self):
+    def cmake_generator_arg(self) -> str:
         return self.cmake_generator_arg_
 
-    def name(self):
+    def name(self) -> str:
         return self.name_
 
-    def cmd_line(self):  # cmd + args
+    def cmd_line(self) -> list:  # cmd + args
         return self.cmd_line_
 
 
@@ -70,7 +70,9 @@ def build_command_cmake(source_dir_path: str, prefix_path: str, cmake_flags: lis
         os.mkdir('build_cmake_release')
         os.chdir('build_cmake_release')
         subprocess.call(cmake_line)
-        subprocess.call([build_system.cmd_line(), 'install'])
+        make_line = build_system.cmd_line()
+        make_line.extend('install')
+        subprocess.call(make_line)
         if hasattr(shutil, 'which') and shutil.which('ldconfig'):
             subprocess.call(['ldconfig'])
     except Exception as ex:
@@ -98,7 +100,9 @@ def build_command_configure(compiler_flags: CompileInfo, patch_dir_path, prefix_
     compile_cmd = [executable, '--prefix={0}'.format(prefix_path)]
     compile_cmd.extend(compiler_flags.flags())
     subprocess.call(compile_cmd)
-    subprocess.call([build_system.cmd_line(), 'install'])
+    make_line = build_system.cmd_line()
+    make_line.extend('install')
+    subprocess.call(make_line)
     if hasattr(shutil, 'which') and shutil.which('ldconfig'):
         subprocess.call(['ldconfig'])
 
@@ -211,7 +215,7 @@ class BuildRequest(object):
         cloned_dir = utils.git_clone(url, branch, remove_dot_git)
         self._build_via_cmake(cloned_dir, cmake_flags)
 
-    def _build_via_cmake(self, directory, cmake_flags):
+    def _build_via_cmake(self, directory, cmake_flags: list):
         build_command_cmake(directory, self.prefix_path_, cmake_flags)
 
     def _download_and_build_via_configure(self, url, compiler_flags: CompileInfo, executable='./configure'):
