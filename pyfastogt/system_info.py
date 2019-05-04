@@ -110,6 +110,7 @@ class RedHatPlatform(Platform):
     def install_package(self, name):
         subprocess.call(['yum', '-y', 'install', name])
 
+
 class ArchPlatform(Platform):
     def __init__(self, arch, package_types):
         Platform.__init__(self, 'linux', arch, package_types)
@@ -206,11 +207,14 @@ class AndroidCommonPlatform(Platform):
 
 
 class AndroidPlatforms(SupportedPlatforms):
-    PLATFORM='android-16'
+    PLATFORM = 'android-16'
+
     def __init__(self):
         SupportedPlatforms.__init__(self, 'android',
-                                    [Architecture('arm', 32, '/opt/android-ndk/platforms/'+ self.PLATFORM + '/arch-arm/usr/')],
-                                    [Architecture('i386', 32, '/opt/android-ndk/platforms/'+ self.PLATFORM + '/arch-x86/usr/')],
+                                    [Architecture('arm', 32,
+                                                  '/opt/android-ndk/platforms/' + self.PLATFORM + '/arch-arm/usr/'),
+                                     Architecture('i386', 32,
+                                                  '/opt/android-ndk/platforms/' + self.PLATFORM + '/arch-x86/usr/')],
                                     ['APK'])
 
     def make_platform_by_arch(self, arch, package_types) -> Platform:
