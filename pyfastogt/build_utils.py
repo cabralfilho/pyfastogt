@@ -80,16 +80,14 @@ def build_command_cmake(source_dir_path: str, prefix_path: str, cmake_flags: lis
         os.chdir(current_dir)
 
 
-def build_command_configure(compiler_flags: CompileInfo, source_dir_path, prefix_path, executable='./configure',
+def build_command_configure(compiler_flags: CompileInfo, patch_dir_path, prefix_path, executable='./configure',
                             build_system=get_supported_build_system_by_name('make')):
-    # patches
-    script_dir = os.path.dirname(source_dir_path)
     # +x for exec file
     st = os.stat(executable)
     os.chmod(executable, st.st_mode | stat.S_IEXEC)
 
     for file_names in compiler_flags.patches():
-        scan_dir = os.path.join(script_dir, file_names)
+        scan_dir = os.path.join(patch_dir_path, file_names)
         if os.path.exists(scan_dir):
             for diff in os.listdir(scan_dir):
                 if re.match(r'.+\.patch', diff):
