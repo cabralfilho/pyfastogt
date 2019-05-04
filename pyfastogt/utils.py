@@ -124,7 +124,7 @@ def extract_file(path, remove_after_extract=True):
     finally:
         tar_file.close()
         if remove_after_extract:
-            os.remove(tar_file)
+            os.remove(path)
 
     return os.path.join(current_dir, target_path)
 
