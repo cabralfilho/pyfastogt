@@ -206,9 +206,11 @@ class AndroidCommonPlatform(Platform):
 
 
 class AndroidPlatforms(SupportedPlatforms):
+    PLATFORM='android-16'
     def __init__(self):
         SupportedPlatforms.__init__(self, 'android',
-                                    [Architecture('arm', 32, '/opt/android-ndk/platforms/android-9/arch-arm/usr/')],
+                                    [Architecture('arm', 32, '/opt/android-ndk/platforms/'+ self.PLATFORM + '/arch-arm/usr/')],
+                                    [Architecture('i386', 32, '/opt/android-ndk/platforms/'+ self.PLATFORM + '/arch-x86/usr/')],
                                     ['APK'])
 
     def make_platform_by_arch(self, arch, package_types) -> Platform:
