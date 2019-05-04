@@ -23,8 +23,8 @@ class BuildSystem:
 
 
 SUPPORTED_BUILD_SYSTEMS = [BuildSystem('ninja', ['ninja'], 'Ninja'),
-                           BuildSystem('make', ['make', '-jn'], 'Unix Makefiles'),
-                           BuildSystem('gmake', ['gmake', '-jn'], 'Unix Makefiles')]
+                           BuildSystem('make', ['make', '-j4'], 'Unix Makefiles'),
+                           BuildSystem('gmake', ['gmake', '-j4'], 'Unix Makefiles')]
 
 
 def get_supported_build_system_by_name(name) -> BuildSystem:
