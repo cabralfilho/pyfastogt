@@ -55,15 +55,15 @@ class CompileInfo(object):
 
 
 # must be in cmake folder
-def build_command_cmake(prefix_path: str, cmake_flags: list, build_system=get_supported_build_system_by_name('ninja')):
-    cmake_project_root_abs_path = '..'
+def build_command_cmake(prefix_path: str, cmake_flags: list, cmake_project_root_abs_path='..', build_type='RELEASE',
+                        build_system=get_supported_build_system_by_name('ninja')):
     if not os.path.exists(cmake_project_root_abs_path):
         raise BuildError('invalid cmake_project_root_path: %s' % cmake_project_root_abs_path)
 
     cmake_line = ['cmake', cmake_project_root_abs_path, '-G', build_system.cmake_generator_arg(),
-                  '-DCMAKE_BUILD_TYPE=RELEASE']
+                  '-DCMAKE_BUILD_TYPE=%s' % build_type]
     cmake_line.extend(cmake_flags)
-    cmake_line.extend(['-DCMAKE_INSTALL_PREFIX={0}'.format(prefix_path)])
+    cmake_line.extend(['-DCMAKE_INSTALL_PREFIX=%s' % prefix_path])
     try:
         os.mkdir('build_cmake_release')
         os.chdir('build_cmake_release')
