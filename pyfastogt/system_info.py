@@ -20,16 +20,16 @@ class Architecture(object):
 
 
 class Platform(metaclass=ABCMeta):
-    def __init__(self, name: str, arch: Architecture, package_types: list):
+    def __init__(self, name: str, architecture: Architecture, package_types: list):
         self.name_ = name
-        self.arch_ = arch
+        self.architecture_ = architecture
         self.package_types_ = package_types
 
     def name(self) -> str:
         return self.name_
 
-    def arch(self) -> Architecture:
-        return self.arch_
+    def architecture(self) -> Architecture:
+        return self.architecture_
 
     def package_types(self) -> list:
         return self.package_types_
@@ -38,31 +38,30 @@ class Platform(metaclass=ABCMeta):
     def install_package(self, name):
         pass
 
+    def cmake_specific_flags(self) -> list:
+        return []
+
 
 class SupportedPlatforms(metaclass=ABCMeta):
-    def __init__(self, name: str, archs: list, package_types: list):
+    def __init__(self, name: str, architectures: [Architecture], package_types: list):
         self.name_ = name
-        self.archs_ = archs
+        self.architectures_ = architectures
         self.package_types_ = package_types
 
     def name(self) -> str:
         return self.name_
 
-    def archs(self) -> list:
-        return self.archs_
+    def architectures(self) -> [Architecture]:
+        return self.architectures_
 
     def package_types(self) -> list:
         return self.package_types_
 
-    def architecture_by_arch_name(self, arch_name):
-        for curr_arch in self.archs_:
-            if curr_arch.name() == arch_name:
-                return curr_arch
-
-        return None
+    def get_architecture_by_arch_name(self, name: str) -> Architecture:
+        return next((x for x in self.architectures_ if x.name() == name), None)
 
     @abstractmethod
-    def make_platform_by_arch(self, arch, package_types) -> Platform:  # factory method
+    def make_platform_by_arch(self, arch: Architecture, package_types: list) -> Platform:  # factory method
         pass
 
 
@@ -88,7 +87,7 @@ def linux_get_dist():
 # Linux platforms
 
 class DebianPlatform(Platform):
-    def __init__(self, arch, package_types):
+    def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'linux', arch, package_types)
 
     def install_package(self, name):
@@ -96,7 +95,7 @@ class DebianPlatform(Platform):
 
 
 class RedHatPlatform(Platform):
-    def __init__(self, arch, package_types):
+    def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'linux', arch, package_types)
 
     def install_package(self, name):
@@ -104,7 +103,7 @@ class RedHatPlatform(Platform):
 
 
 class ArchPlatform(Platform):
-    def __init__(self, arch, package_types):
+    def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'linux', arch, package_types)
 
     def install_package(self, name):
@@ -121,7 +120,7 @@ class LinuxPlatforms(SupportedPlatforms):
                                                     Architecture('armv6l', 32, '/usr/local')],
                                     ['DEB', 'RPM', 'TGZ'])
 
-    def make_platform_by_arch(self, arch, package_types) -> Platform:
+    def make_platform_by_arch(self, arch: Architecture, package_types: list) -> Platform:
         distr = linux_get_dist()
         if distr == 'DEBIAN':
             return DebianPlatform(arch, package_types)
@@ -134,7 +133,7 @@ class LinuxPlatforms(SupportedPlatforms):
 
 # Windows platforms
 class WindowsMingwPlatform(Platform):
-    def __init__(self, arch, package_types):
+    def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'windows', arch, package_types)
 
     def install_package(self, name):
@@ -150,13 +149,13 @@ class WindowsPlatforms(SupportedPlatforms):
                                      Architecture('i686', 32, '/mingw32')],
                                     ['NSIS', 'ZIP'])
 
-    def make_platform_by_arch(self, arch, package_types) -> Platform:
+    def make_platform_by_arch(self, arch: Architecture, package_types: list) -> Platform:
         return WindowsMingwPlatform(arch, package_types)
 
 
 # MacOSX platforms
 class MacOSXCommonPlatform(Platform):
-    def __init__(self, arch, package_types):
+    def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'macosx', arch, package_types)
 
     def install_package(self, name):
@@ -167,13 +166,13 @@ class MacOSXPlatforms(SupportedPlatforms):
     def __init__(self):
         SupportedPlatforms.__init__(self, 'macosx', [Architecture('x86_64', 64, '/usr/local')], ['DragNDrop', 'ZIP'])
 
-    def make_platform_by_arch(self, arch, package_types) -> Platform:
+    def make_platform_by_arch(self, arch: Architecture, package_types: list) -> Platform:
         return MacOSXCommonPlatform(arch, package_types)
 
 
 # FreeBSD platforms
 class FreeBSDCommonPlatform(Platform):
-    def __init__(self, arch, package_types):
+    def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'freebsd', arch, package_types)
 
     def install_package(self, name):
@@ -185,31 +184,37 @@ class FreeBSDPlatforms(SupportedPlatforms):
         SupportedPlatforms.__init__(self, 'freebsd', [Architecture('x86_64', 64, '/usr/local'),
                                                       Architecture('amd64', 64, '/usr/local')], ['TGZ'])
 
-    def make_platform_by_arch(self, arch, package_types) -> Platform:
+    def make_platform_by_arch(self, arch: Architecture, package_types: list) -> Platform:
         return FreeBSDCommonPlatform(arch, package_types)
 
 
 # Android platforms
+ANDROID_PLATFORM = 'android-16'
+ANDROID_NDK = '~/Android/Sdk/ndk-bundle'
+
+
 class AndroidCommonPlatform(Platform):
-    def __init__(self, arch, package_types):
+    def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'android', arch, package_types)
 
     def install_package(self, name):
         raise NotImplementedError('You need to define a install_package method!')
 
+    def cmake_specific_flags(self) -> list:
+        return ['-DCMAKE_TOOLCHAIN_FILE=%s/build/cmake/android.toolchain.cmake' % ANDROID_NDK,
+                '-DANDROID_PLATFORM=%s' % ANDROID_PLATFORM]
+
 
 class AndroidPlatforms(SupportedPlatforms):
-    PLATFORM = 'android-16'
-
     def __init__(self):
         SupportedPlatforms.__init__(self, 'android',
                                     [Architecture('arm', 32,
-                                                  '/opt/android-ndk/platforms/' + self.PLATFORM + '/arch-arm/usr/'),
+                                                  ANDROID_NDK + '/platforms/' + ANDROID_PLATFORM + '/arch-arm/usr/'),
                                      Architecture('i386', 32,
-                                                  '/opt/android-ndk/platforms/' + self.PLATFORM + '/arch-x86/usr/')],
+                                                  ANDROID_NDK + '/platforms/' + ANDROID_PLATFORM + '/arch-x86/usr/')],
                                     ['APK'])
 
-    def make_platform_by_arch(self, arch, package_types) -> Platform:
+    def make_platform_by_arch(self, arch: Architecture, package_types: list) -> Platform:
         return AndroidCommonPlatform(arch, package_types)
 
 
@@ -259,8 +264,8 @@ def get_arch_name() -> str:
     return platform.machine()
 
 
-def get_supported_platform_by_name(platform) -> SupportedPlatforms:
-    return next((x for x in SUPPORTED_PLATFORMS if x.name() == platform), None)
+def get_supported_platform_by_name(name: str) -> SupportedPlatforms:
+    return next((x for x in SUPPORTED_PLATFORMS if x.name() == name), None)
 
 
 def stable_path(path) -> str:

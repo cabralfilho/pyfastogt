@@ -113,12 +113,12 @@ class BuildRequest(object):
     ARCH_OPENSSL_COMP = "gz"
     ARCH_OPENSSL_EXT = "tar." + ARCH_OPENSSL_COMP
 
-    def __init__(self, platform, arch_name, patch_path, dir_path, prefix_path):
+    def __init__(self, platform: str, arch_name: str, patch_path: str, dir_path: str, prefix_path: str):
         platform_or_none = system_info.get_supported_platform_by_name(platform)
         if not platform_or_none:
             raise BuildError('invalid platform')
 
-        arch_or_none = platform_or_none.architecture_by_arch_name(arch_name)
+        arch_or_none = platform_or_none.get_architecture_by_arch_name(arch_name)
         if not arch_or_none:
             raise BuildError('invalid arch')
 
@@ -245,6 +245,8 @@ class BuildRequest(object):
 
     # raw build
     def _build_via_cmake(self, cmake_flags: list):
+        cmake_flags_extended = cmake_flags
+        cmake_flags_extended.extend(self.platform_.cmake_specific_flags())
         build_command_cmake(self.prefix_path_, cmake_flags)
 
     def _build_via_configure(self, compiler_flags: CompileInfo, executable='./configure'):
