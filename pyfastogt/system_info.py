@@ -4,18 +4,18 @@ from abc import ABCMeta, abstractmethod
 
 
 class Architecture(object):
-    def __init__(self, arch_str, bit, default_install_prefix_path):
-        self.name_ = arch_str
+    def __init__(self, arch: str, bit: int, default_install_prefix_path: str):
+        self.name_ = arch
         self.bit_ = bit
         self.default_install_prefix_path_ = default_install_prefix_path
 
-    def name(self):
+    def name(self) -> str:
         return self.name_
 
-    def bit(self):
+    def bit(self) -> int:
         return self.bit_
 
-    def default_install_prefix_path(self):
+    def default_install_prefix_path(self) -> str:
         return self.default_install_prefix_path_
 
 
@@ -35,7 +35,7 @@ class Platform(metaclass=ABCMeta):
         return self.package_types_
 
     @abstractmethod
-    def install_package(self, name):
+    def install_package(self, name: str):
         pass
 
     def cmake_specific_flags(self) -> list:
@@ -90,7 +90,7 @@ class DebianPlatform(Platform):
     def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'linux', arch, package_types)
 
-    def install_package(self, name):
+    def install_package(self, name: str):
         subprocess.call(['apt-get', '-y', '--no-install-recommends', 'install', name])
 
 
@@ -98,7 +98,7 @@ class RedHatPlatform(Platform):
     def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'linux', arch, package_types)
 
-    def install_package(self, name):
+    def install_package(self, name: str):
         subprocess.call(['yum', '-y', 'install', name])
 
 
@@ -106,7 +106,7 @@ class ArchPlatform(Platform):
     def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'linux', arch, package_types)
 
-    def install_package(self, name):
+    def install_package(self, name: str):
         subprocess.call(['pacman', '-S', '--noconfirm', name])
 
 
@@ -136,7 +136,7 @@ class WindowsMingwPlatform(Platform):
     def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'windows', arch, package_types)
 
-    def install_package(self, name):
+    def install_package(self, name: str):
         subprocess.call(['pacman', '-S', '--noconfirm', name])
 
 
@@ -158,7 +158,7 @@ class MacOSXCommonPlatform(Platform):
     def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'macosx', arch, package_types)
 
-    def install_package(self, name):
+    def install_package(self, name: str):
         subprocess.call(['port', 'install', name])
 
 
@@ -175,7 +175,7 @@ class FreeBSDCommonPlatform(Platform):
     def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'freebsd', arch, package_types)
 
-    def install_package(self, name):
+    def install_package(self, name: str):
         raise NotImplementedError('You need to define a install_package method!')
 
 
@@ -197,7 +197,7 @@ class AndroidCommonPlatform(Platform):
     def __init__(self, arch: Architecture, package_types: list):
         Platform.__init__(self, 'android', arch, package_types)
 
-    def install_package(self, name):
+    def install_package(self, name: str):
         raise NotImplementedError('You need to define a install_package method!')
 
     def cmake_specific_flags(self) -> list:
@@ -268,7 +268,7 @@ def get_supported_platform_by_name(name: str) -> SupportedPlatforms:
     return next((x for x in SUPPORTED_PLATFORMS if x.name() == name), None)
 
 
-def stable_path(path) -> str:
+def stable_path(path: str) -> str:
     if get_os() == 'windows':
         return path.replace("\\", "/")
 
