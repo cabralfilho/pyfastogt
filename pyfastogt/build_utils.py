@@ -209,21 +209,21 @@ class BuildRequest(object):
         self.platform_.install_package(name)
 
     # clone
-    def _clone_and_build_via_cmake(self, url, cmake_flags: list, branch=None, remove_dot_git=True):
+    def _clone_and_build_via_cmake(self, url: str, cmake_flags: list, branch=None, remove_dot_git=True):
         pwd = os.getcwd()
         cloned_dir = utils.git_clone(url, branch, remove_dot_git)
         os.chdir(cloned_dir)
         self._build_via_cmake(cmake_flags)
         os.chdir(pwd)
 
-    def _clone_and_build_via_configure(self, url, compiler_flags: CompileInfo, branch=None, remove_dot_git=True):
+    def _clone_and_build_via_configure(self, url: str, compiler_flags: CompileInfo, branch=None, remove_dot_git=True):
         pwd = os.getcwd()
         cloned_dir = utils.git_clone(url, branch, remove_dot_git)
         os.chdir(cloned_dir)
         self._build_via_configure(compiler_flags)
         os.chdir(pwd)
 
-    def _clone_and_build_via_autogen(self, url, compiler_flags: CompileInfo, executable='./configure', branch=None,
+    def _clone_and_build_via_autogen(self, url: str, compiler_flags: CompileInfo, executable='./configure', branch=None,
                                      remove_dot_git=True):
         pwd = os.getcwd()
         cloned_dir = utils.git_clone(url, branch, remove_dot_git)
@@ -232,7 +232,15 @@ class BuildRequest(object):
         os.chdir(pwd)
 
     # download
-    def _download_and_build_via_autogen(self, url, compiler_flags: CompileInfo, executable='./configure'):
+    def _download_and_build_via_cmake(self, url: str, cmake_flags: list):
+        pwd = os.getcwd()
+        file_path = utils.download_file(url)
+        extracted_folder = utils.extract_file(file_path)
+        os.chdir(extracted_folder)
+        self._build_via_cmake(cmake_flags)
+        os.chdir(pwd)
+
+    def _download_and_build_via_autogen(self, url: str, compiler_flags: CompileInfo, executable='./configure'):
         pwd = os.getcwd()
         file_path = utils.download_file(url)
         extracted_folder = utils.extract_file(file_path)
@@ -240,7 +248,7 @@ class BuildRequest(object):
         self._build_via_autogen(compiler_flags, executable)
         os.chdir(pwd)
 
-    def _download_and_build_via_configure(self, url, compiler_flags: CompileInfo, executable='./configure'):
+    def _download_and_build_via_configure(self, url: str, compiler_flags: CompileInfo, executable='./configure'):
         pwd = os.getcwd()
         file_path = utils.download_file(url)
         extracted_folder = utils.extract_file(file_path)
