@@ -74,6 +74,7 @@ def build_command_cmake(prefix_path: str, cmake_flags: list, build_type='RELEASE
         os.chdir(build_dir_name)
         subprocess.call(cmake_line)
         make_line = build_system.cmd_line()
+        subprocess.call(make_line)
         make_line.append('install')
         subprocess.call(make_line)
         if hasattr(shutil, 'which') and shutil.which('ldconfig'):
@@ -103,6 +104,7 @@ def build_command_configure(compiler_flags: CompileInfo, patch_dir_path, prefix_
     compile_cmd.extend(compiler_flags.flags())
     subprocess.call(compile_cmd)
     make_line = build_system.cmd_line()
+    subprocess.call(make_line)
     make_line.append('install')
     subprocess.call(make_line)
     if hasattr(shutil, 'which') and shutil.which('ldconfig'):
