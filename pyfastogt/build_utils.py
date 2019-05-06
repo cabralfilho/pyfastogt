@@ -247,4 +247,4 @@ class BuildRequest(object):
     def _build_via_configure(self, compiler_flags: list, executable='./configure'):
         compiler_flags_extended = compiler_flags
         compiler_flags_extended.extend(self.platform_.configure_specific_flags())
-        build_command_configure(compiler_flags, self.prefix_path_, executable)
+        build_command_configure(compiler_flags_extended, self.prefix_path_, executable)

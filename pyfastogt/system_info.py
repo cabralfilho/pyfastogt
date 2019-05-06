@@ -212,10 +212,10 @@ class AndroidCommonPlatform(Platform):
     def configure_specific_flags(self) -> list:
         arch = self.architecture()
         abs_prefix_path = os.path.expanduser(ANDROID_NDK)
-        return [
-            'CC={0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang'.format(abs_prefix_path,
-                                                                                                    arch.name()),
-            '--host=%s-linux-androideabi' % arch.name()]
+        return ['CC={0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang'.format(abs_prefix_path,
+                                                                                                        arch.name()),
+                'CXX={0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang++'.format(
+                    abs_prefix_path, arch.name()), '--host=%s-linux-androideabi' % arch.name()]
 
 
 class AndroidPlatforms(SupportedPlatforms):
