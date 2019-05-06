@@ -39,6 +39,9 @@ class Platform(metaclass=ABCMeta):
     def install_package(self, name: str):
         pass
 
+    def env_variables(self) -> dict:
+        return {}
+
     def cmake_specific_flags(self) -> list:
         return []
 
@@ -204,6 +207,15 @@ class AndroidCommonPlatform(Platform):
     def install_package(self, name: str):
         raise NotImplementedError('You need to define a install_package method!')
 
+    def env_variables(self) -> dict:
+        arch = self.architecture()
+        abs_prefix_path = os.path.expanduser(ANDROID_NDK)
+        return {
+            'CC': '{0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang'.format(abs_prefix_path,
+                                                                                                       arch.name()),
+            'CXX': '{0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang++'.format(
+                abs_prefix_path, arch.name())}
+
     def cmake_specific_flags(self) -> list:
         abs_prefix_path = os.path.expanduser(ANDROID_NDK)
         return ['-DCMAKE_TOOLCHAIN_FILE=%s/build/cmake/android.toolchain.cmake' % abs_prefix_path,
@@ -211,11 +223,7 @@ class AndroidCommonPlatform(Platform):
 
     def configure_specific_flags(self) -> list:
         arch = self.architecture()
-        abs_prefix_path = os.path.expanduser(ANDROID_NDK)
-        return ['CC={0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang'.format(abs_prefix_path,
-                                                                                                        arch.name()),
-                'CXX={0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang++'.format(
-                    abs_prefix_path, arch.name()), '--host=%s-linux-androideabi' % arch.name()]
+        return ['--host=%s-linux-androideabi' % arch.name()]
 
 
 class AndroidPlatforms(SupportedPlatforms):

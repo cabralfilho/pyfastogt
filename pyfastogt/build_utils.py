@@ -112,6 +112,10 @@ class BuildRequest(object):
         packages_types = platform_or_none.package_types()
         build_platform = platform_or_none.make_platform_by_arch(arch_or_none, packages_types)
 
+        env = build_platform.env_variables()
+        for key, value in env.items():
+            os.environ[key] = value
+
         self.platform_ = build_platform
         build_dir_path = os.path.abspath(dir_path)
         if os.path.exists(build_dir_path):
