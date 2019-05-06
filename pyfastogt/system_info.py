@@ -196,7 +196,8 @@ class FreeBSDPlatforms(SupportedPlatforms):
 
 
 # Android platforms
-ANDROID_PLATFORM = 'android-16'
+ANDROID_PLATFORM_NUMBER = 16
+ANDROID_PLATFORM = 'android-%s' % ANDROID_PLATFORM_NUMBER
 ANDROID_NDK = '~/Android/Sdk/ndk-bundle'
 
 
@@ -211,10 +212,11 @@ class AndroidCommonPlatform(Platform):
         arch = self.architecture()
         abs_prefix_path = os.path.expanduser(ANDROID_NDK)
         return {
-            'CC': '{0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang'.format(abs_prefix_path,
-                                                                                                       arch.name()),
-            'CXX': '{0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang++'.format(
-                abs_prefix_path, arch.name())}
+            'CC': '{0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi{2}-clang'.format(abs_prefix_path,
+                                                                                                        arch.name(),
+                                                                                                        ANDROID_PLATFORM_NUMBER),
+            'CXX': '{0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi{2}-clang++'.format(
+                abs_prefix_path, arch.name(), ANDROID_PLATFORM_NUMBER)}
 
     def cmake_specific_flags(self) -> list:
         abs_prefix_path = os.path.expanduser(ANDROID_NDK)

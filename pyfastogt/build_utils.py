@@ -186,7 +186,7 @@ class BuildRequest(object):
         platform = self.platform()
         if platform.name() == 'android':
             compiler_flags.extend(['no-asm'])
- 
+
         url = '{0}openssl-{1}.{2}'.format(self.OPENSSL_SRC_ROOT, version, self.ARCH_OPENSSL_EXT)
         self._download_and_build_via_configure(url, compiler_flags, './config', False)
 
