@@ -221,9 +221,7 @@ class AndroidCommonPlatform(Platform):
 class AndroidPlatforms(SupportedPlatforms):
     def __init__(self):
         SupportedPlatforms.__init__(self, 'android',
-                                    [Architecture('arm', 32,
-                                                  ANDROID_NDK + '/platforms/' + ANDROID_PLATFORM + '/arch-arm/usr/'),
-                                     Architecture('armv7a', 32,
+                                    [Architecture('armv7a', 32,
                                                   ANDROID_NDK + '/platforms/' + ANDROID_PLATFORM + '/arch-arm/usr/'),
                                      Architecture('i686', 32,
                                                   ANDROID_NDK + '/platforms/' + ANDROID_PLATFORM + '/arch-x86/usr/'),
