@@ -205,7 +205,7 @@ class AndroidCommonPlatform(Platform):
         raise NotImplementedError('You need to define a install_package method!')
 
     def cmake_specific_flags(self) -> list:
-        abs_prefix_path = os.path.abspath(ANDROID_NDK)
+        abs_prefix_path = os.path.expanduser(ANDROID_NDK)
         return ['-DCMAKE_TOOLCHAIN_FILE=%s/build/cmake/android.toolchain.cmake' % abs_prefix_path,
                 '-DANDROID_PLATFORM=%s' % ANDROID_PLATFORM]
 
