@@ -108,11 +108,12 @@ class BuildRequest(object):
 
         if not prefix_path:
             prefix_path = arch_or_none.default_install_prefix_path()
+        abs_prefix_path = os.path.expanduser(prefix_path)
 
         packages_types = platform_or_none.package_types()
         build_platform = platform_or_none.make_platform_by_arch(arch_or_none, packages_types)
 
-        os.environ['PKG_CONFIG_PATH'] = '$PKG_CONFIG_PATH:%s/lib/pkgconfig/' % prefix_path
+        os.environ['PKG_CONFIG_PATH'] = '$PKG_CONFIG_PATH:%s/lib/pkgconfig/' % abs_prefix_path
         env = build_platform.env_variables()
         for key, value in env.items():
             os.environ[key] = value
@@ -126,7 +127,7 @@ class BuildRequest(object):
         os.chdir(build_dir_path)
 
         self.build_dir_path_ = build_dir_path
-        self.prefix_path_ = prefix_path
+        self.prefix_path_ = abs_prefix_path
         print("Build request for platform: {0}({1}) created".format(build_platform.name(), arch_or_none.name()))
 
     def platform(self):
