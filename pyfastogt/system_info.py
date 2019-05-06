@@ -41,6 +41,9 @@ class Platform(metaclass=ABCMeta):
     def cmake_specific_flags(self) -> list:
         return []
 
+    def configure_specific_flags(self) -> list:
+        return []
+
 
 class SupportedPlatforms(metaclass=ABCMeta):
     def __init__(self, name: str, architectures: [Architecture], package_types: list):
@@ -204,13 +207,26 @@ class AndroidCommonPlatform(Platform):
         return ['-DCMAKE_TOOLCHAIN_FILE=%s/build/cmake/android.toolchain.cmake' % ANDROID_NDK,
                 '-DANDROID_PLATFORM=%s' % ANDROID_PLATFORM]
 
+    def configure_specific_flags(self) -> list:
+        arch = self.architecture()
+        return [
+            'CC={0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang'.format(arch.name(),
+                                                                                                    arch.name()),
+            '--host=arm-linux-androideabi']
+
 
 class AndroidPlatforms(SupportedPlatforms):
     def __init__(self):
         SupportedPlatforms.__init__(self, 'android',
                                     [Architecture('arm', 32,
                                                   ANDROID_NDK + '/platforms/' + ANDROID_PLATFORM + '/arch-arm/usr/'),
-                                     Architecture('i386', 32,
+                                     Architecture('armv7a', 32,
+                                                  ANDROID_NDK + '/platforms/' + ANDROID_PLATFORM + '/arch-arm/usr/'),
+                                     Architecture('i686', 32,
+                                                  ANDROID_NDK + '/platforms/' + ANDROID_PLATFORM + '/arch-x86/usr/'),
+                                     Architecture('x86_64', 64,
+                                                  ANDROID_NDK + '/platforms/' + ANDROID_PLATFORM + '/arch-x86/usr/'),
+                                     Architecture('aarch64', 64,
                                                   ANDROID_NDK + '/platforms/' + ANDROID_PLATFORM + '/arch-x86/usr/')],
                                     ['APK'])
 
