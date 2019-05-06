@@ -184,7 +184,7 @@ class BuildRequest(object):
     def build_openssl(self, version):
         compiler_flags = ['no-shared', 'no-unit-test']
         url = '{0}openssl-{1}.{2}'.format(self.OPENSSL_SRC_ROOT, version, self.ARCH_OPENSSL_EXT)
-        self._download_and_build_via_configure(url, compiler_flags, './config')
+        self._download_and_build_via_configure(url, compiler_flags, './config', False)
 
     # install packages
     def _install_package(self, name: str):
@@ -198,19 +198,21 @@ class BuildRequest(object):
         self._build_via_cmake(cmake_flags)
         os.chdir(pwd)
 
-    def _clone_and_build_via_configure(self, url: str, compiler_flags: list, branch=None, remove_dot_git=True):
+    def _clone_and_build_via_configure(self, url: str, compiler_flags: list, executable='./configure',
+                                       use_platform_flags=True, branch=None, remove_dot_git=True):
         pwd = os.getcwd()
         cloned_dir = utils.git_clone(url, branch, remove_dot_git)
         os.chdir(cloned_dir)
-        self._build_via_configure(compiler_flags)
+        self._build_via_configure(compiler_flags, executable, use_platform_flags)
         os.chdir(pwd)
 
-    def _clone_and_build_via_autogen(self, url: str, compiler_flags: list, executable='./configure', branch=None,
+    def _clone_and_build_via_autogen(self, url: str, compiler_flags: list, executable='./configure',
+                                     use_platform_flags=True, branch=None,
                                      remove_dot_git=True):
         pwd = os.getcwd()
         cloned_dir = utils.git_clone(url, branch, remove_dot_git)
         os.chdir(cloned_dir)
-        self._build_via_autogen(compiler_flags, executable)
+        self._build_via_autogen(compiler_flags, executable, use_platform_flags)
         os.chdir(pwd)
 
     # download
@@ -222,35 +224,39 @@ class BuildRequest(object):
         self._build_via_cmake(cmake_flags)
         os.chdir(pwd)
 
-    def _download_and_build_via_autogen(self, url: str, compiler_flags: list, executable='./configure'):
+    def _download_and_build_via_autogen(self, url: str, compiler_flags: list, executable='./configure',
+                                        use_platform_flags=True):
         pwd = os.getcwd()
         file_path = utils.download_file(url)
         extracted_folder = utils.extract_file(file_path)
         os.chdir(extracted_folder)
-        self._build_via_autogen(compiler_flags, executable)
+        self._build_via_autogen(compiler_flags, executable, use_platform_flags)
         os.chdir(pwd)
 
-    def _download_and_build_via_configure(self, url: str, compiler_flags: list, executable='./configure'):
+    def _download_and_build_via_configure(self, url: str, compiler_flags: list, executable='./configure',
+                                          use_platform_flags=True):
         pwd = os.getcwd()
         file_path = utils.download_file(url)
         extracted_folder = utils.extract_file(file_path)
         os.chdir(extracted_folder)
-        self._build_via_configure(compiler_flags, executable)
+        self._build_via_configure(compiler_flags, executable, use_platform_flags)
         os.chdir(pwd)
 
     # build
-    def _build_via_autogen(self, compiler_flags: list, executable='./configure'):
+    def _build_via_autogen(self, compiler_flags: list, executable='./configure', use_platform_flags=True):
         autogen_line = ['sh', 'autogen.sh']
         subprocess.call(autogen_line)
-        self._build_via_configure(compiler_flags, executable)
+        self._build_via_configure(compiler_flags, executable, use_platform_flags)
 
     # raw build
-    def _build_via_cmake(self, cmake_flags: list):
+    def _build_via_cmake(self, cmake_flags: list, use_platform_flags=True):
         cmake_flags_extended = cmake_flags
-        cmake_flags_extended.extend(self.platform_.cmake_specific_flags())
+        if use_platform_flags:
+            cmake_flags_extended.extend(self.platform_.cmake_specific_flags())
         build_command_cmake(self.prefix_path_, cmake_flags)
 
-    def _build_via_configure(self, compiler_flags: list, executable='./configure'):
+    def _build_via_configure(self, compiler_flags: list, executable='./configure', use_platform_flags=True):
         compiler_flags_extended = compiler_flags
-        compiler_flags_extended.extend(self.platform_.configure_specific_flags())
+        if use_platform_flags:
+            compiler_flags_extended.extend(self.platform_.configure_specific_flags())
         build_command_configure(compiler_flags_extended, self.prefix_path_, executable)
