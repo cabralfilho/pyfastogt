@@ -183,8 +183,11 @@ class BuildRequest(object):
 
     def build_openssl(self, version):
         compiler_flags = ['no-shared', 'no-unit-test']
-        if self.platform_name() == 'android':
+        platform = self.platform()
+        if platform.name() == 'android':
             compiler_flags.extend(['no-asm'])
+            if platform.architecture().name() == 'armv7a':
+                compiler_flags.extend('android-armv7')
         url = '{0}openssl-{1}.{2}'.format(self.OPENSSL_SRC_ROOT, version, self.ARCH_OPENSSL_EXT)
         self._download_and_build_via_configure(url, compiler_flags, './config', False)
 
