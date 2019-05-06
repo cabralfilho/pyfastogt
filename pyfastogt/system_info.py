@@ -1,5 +1,6 @@
 import platform
 import subprocess
+import os
 from abc import ABCMeta, abstractmethod
 
 
@@ -204,13 +205,15 @@ class AndroidCommonPlatform(Platform):
         raise NotImplementedError('You need to define a install_package method!')
 
     def cmake_specific_flags(self) -> list:
-        return ['-DCMAKE_TOOLCHAIN_FILE=%s/build/cmake/android.toolchain.cmake' % ANDROID_NDK,
+        abs_prefix_path = os.path.abspath(ANDROID_NDK)
+        return ['-DCMAKE_TOOLCHAIN_FILE=%s/build/cmake/android.toolchain.cmake' % abs_prefix_path,
                 '-DANDROID_PLATFORM=%s' % ANDROID_PLATFORM]
 
     def configure_specific_flags(self) -> list:
         arch = self.architecture()
+        abs_prefix_path = os.path.abspath(ANDROID_NDK)
         return [
-            'CC={0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang'.format(ANDROID_NDK,
+            'CC={0}/toolchains/llvm/prebuilt/linux-x86_64/bin/{1}-linux-androideabi16-clang'.format(abs_prefix_path,
                                                                                                     arch.name()),
             '--host=%s-linux-androideabi' % arch.name()]
 
