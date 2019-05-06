@@ -112,6 +112,7 @@ class BuildRequest(object):
         packages_types = platform_or_none.package_types()
         build_platform = platform_or_none.make_platform_by_arch(arch_or_none, packages_types)
 
+        os.environ['PKG_CONFIG_PATH'] = '$PKG_CONFIG_PATH:%s/lib/pkgconfig/' % prefix_path
         env = build_platform.env_variables()
         for key, value in env.items():
             os.environ[key] = value
