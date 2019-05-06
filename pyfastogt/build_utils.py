@@ -45,10 +45,11 @@ def build_command_cmake(prefix_path: str, cmake_flags: list, build_type='RELEASE
     if not os.path.exists(cmake_project_root_abs_path):
         raise BuildError('invalid cmake_project_root_path: %s' % cmake_project_root_abs_path)
 
+    abs_prefix_path = os.path.abspath(prefix_path)
     cmake_line = ['cmake', cmake_project_root_abs_path, '-G', build_system.cmake_generator_arg(),
                   '-DCMAKE_BUILD_TYPE=%s' % build_type]
     cmake_line.extend(cmake_flags)
-    cmake_line.extend(['-DCMAKE_INSTALL_PREFIX=%s' % prefix_path])
+    cmake_line.extend(['-DCMAKE_INSTALL_PREFIX=%s' % abs_prefix_path])
     try:
         build_dir_name = 'build_cmake_%s' % build_type.lower()
         if os.path.exists(build_dir_name):
@@ -75,7 +76,8 @@ def build_command_configure(compiler_flags: list, prefix_path, executable='./con
     st = os.stat(executable)
     os.chmod(executable, st.st_mode | stat.S_IEXEC)
 
-    compile_cmd = [executable, '--prefix={0}'.format(prefix_path)]
+    abs_prefix_path = os.path.abspath(prefix_path)
+    compile_cmd = [executable, '--prefix={0}'.format(abs_prefix_path)]
     compile_cmd.extend(compiler_flags)
     subprocess.call(compile_cmd)
     make_line = build_system.cmd_line()
