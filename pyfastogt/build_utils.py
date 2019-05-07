@@ -89,7 +89,7 @@ def build_command_configure(compiler_flags: list, prefix_path, executable='./con
 
 
 def generate_fastogt_git_path(repo_name) -> str:
-    return 'git@github.com:fastogt/%s.git' % repo_name
+    return 'https://github.com/fastogt/%s' % repo_name
 
 
 class BuildRequest(object):
